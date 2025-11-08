@@ -2,4 +2,4 @@
 // Entry point for the package
 
 export type { TypeFromPropTypes } from './TypeFromPropTypes.js';
-
+export { createSafeContext } from './createSafeContext.js';
