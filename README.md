@@ -51,7 +51,7 @@ This is especially powerful during migrations when you have hundreds of componen
 ```typescript
 import type { TypeFromPropKeys } from 'react-ts-migration-utils';
 
-// Use with destructured props - define props inline in typeof
+// Use with destructured props - define props with any or unknown
 function MyComponent({
   isVisible,
   itemCount,
@@ -67,7 +67,6 @@ function MyComponent({
   itemCount: any;
   userName: any;
   onClick: any;
-  children: any;
   headerIcon: any;
   createdAt: any;
   publishedDate: any;
@@ -79,7 +78,6 @@ function MyComponent({
   // - itemCount: number            (*Count → number)
   // - userName: string             (*Name → string)
   // - onClick: (...args: any[]) => void | Promise<void>  (on* → handler)
-  // - children: ReactNode          (children → ReactNode)
   // - headerIcon: ReactNode        (*Icon → ReactNode)
   // - createdAt: string | number | Date  (*At → date)
   // - publishedDate: string | number | Date  (*Date → date)
@@ -89,7 +87,6 @@ function MyComponent({
     return (
       <div onClick={onClick}>
         {headerIcon}
-        {children}
         <span>{userName} has {itemCount} items</span>
       </div>
     );
