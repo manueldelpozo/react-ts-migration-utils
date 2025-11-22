@@ -1,6 +1,6 @@
 {
   "name": "react-ts-migration-utils",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Utilities to help migrate legacy React JS projects to TypeScript",
   "author": "Manuel del Pozo",
   "license": "MIT",
