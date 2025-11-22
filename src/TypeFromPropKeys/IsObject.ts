@@ -8,6 +8,6 @@ type CommonObjectProp = 'config'
     | 'state'
     | 'status';
 
-type HasObjectPrefix = `${string}${Capitalize<CommonObjectProp>}`;
+type HasObjectSufix = `${string}${Capitalize<CommonObjectProp>}`;
 
-export type IsObject = HasObjectPrefix | CommonObjectProp;
+export type IsObject = HasObjectSufix | CommonObjectProp;
