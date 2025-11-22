@@ -42,7 +42,11 @@ npm run playground:dev
 
 ### TypeFromPropKeys
 
-Automatically infer TypeScript types from prop names using intelligent naming conventions. Perfect for quickly typing components without manually writing every type!
+Automatically infer TypeScript types from prop names using intelligent naming conventions. This utility analyzes your prop names and infers appropriate types based on common React and JavaScript naming patterns, dramatically speeding up the migration process from JavaScript to TypeScript.
+
+Instead of manually typing every prop (e.g., `onClick: () => void`, `isVisible: boolean`, `itemCount: number`), simply pass your props object with `any` or `unknown` types, and `TypeFromPropKeys` will intelligently infer the correct types based on naming conventions. It even works with mixed types—if a prop already has a specific type, it will preserve it; if it's `unknown` or `any`, it will infer from the name.
+
+This is especially powerful during migrations when you have hundreds of components to convert. You can quickly add type safety without spending hours writing type definitions, and the inferred types are based on industry-standard naming conventions that most React codebases already follow.
 
 ```typescript
 import type { TypeFromPropKeys } from 'react-ts-migration-utils';
@@ -58,7 +62,7 @@ function MyComponent({
   createdAt,
   publishedDate,
   config,
-}: TypeFromPropKeys<typeof {
+}: TypeFromPropKeys<{
   isVisible: any;
   itemCount: any;
   userName: any;
@@ -97,31 +101,46 @@ function MyComponent({
 **Works with mixed known and unknown types:**
 ```typescript
 import type { TypeFromPropKeys } from 'react-ts-migration-utils';
+import type { PropsWithChildren } from 'react';
 
-type MixedProps = {
+interface MixedProps {
   onClick: unknown;  // Will be inferred as function
   count: number;     // Will remain as number (more specific)
   name: string;      // Will remain as string (more specific)
 };
 
-type Inferred = TypeFromPropKeys<MixedProps>;
+// Use PropsWithChildren to add children prop
+type ComponentProps = PropsWithChildren<TypeFromPropKeys<MixedProps>>;
 // Result:
 // {
 //   onClick: (...args: any[]) => void | Promise<void>;
 //   count: number;
 //   name: string;
+//   children?: ReactNode;
 // }
+
+function MyComponent({ onClick, count, name, children }: ComponentProps) {
+  return (
+    <div onClick={onClick}>
+      <h1>{name}</h1>
+      <p>Count: {count}</p>
+      {children}
+    </div>
+  );
+}
 ```
 
 **Supported Patterns:**
-- **Event handlers**: `on*`, `handle*`, `set*`, etc. → `(...args: any[]) => void | Promise<void>`
-- **React nodes**: `children`, `icon`, `header`, `footer`, `*Icon`, `*Content`, etc. → `ReactNode`
-- **Booleans**: `is*`, `has*`, `disabled`, `checked`, etc. → `boolean`
-- **Arrays**: `*List`, `*Items`, `*Array`, `items`, etc. → `any[]`
-- **Numbers**: `*Count`, `*Size`, `*Width`, `*Height`, etc. → `number`
-- **Objects**: `*config`, `*options`, `*settings`, `data`, etc. → `Record<string, any>`
-- **Dates**: `*Date`, `*Time`, `*At`, `createdAt`, `updatedAt`, etc. → `string | number | Date`
-- **Strings**: `*Id`, `*Name`, `*Title`, `*Label`, etc. → `string`
+
+| Category | Pattern Examples | Inferred Type | Notes |
+|----------|-----------------|---------------|-------|
+| **Event Handlers** | `onClick`, `onChange`, `onSubmit`, `handleClick`, `handleSubmit`, `setValue`, `getData`, `toggleState`, `resetForm`, `clearCache`, `updateItem`, `deleteRecord`, `createUser`, `saveData`, `loadContent`, `fetchData`, `cancelAction`, `closeModal`, `openDialog` | `(...args: any[]) => void \| Promise<void>` | Matches any prop starting with: `on`, `handle`, `set`, `get`, `toggle`, `reset`, `clear`, `update`, `delete`, `create`, `save`, `load`, `fetch`, `submit`, `cancel`, `close`, `open` (capitalized) |
+| **Booleans** | `isVisible`, `hasError`, `doesExist`, `areEnabled`, `willLoad`, `canEdit`, `shouldRender`, `didMount`, `doShow`, `showModal`, `hidePanel`, `disabled`, `checked`, `required`, `readonly`, `readOnly`, `selected`, `open`, `loading`, `hidden`, `focused` | `boolean` | Matches props starting with: `is`, `has`, `does`, `are`, `will`, `can`, `should`, `did`, `do`, `show`, `hide` (capitalized), or common boolean props |
+| **Arrays** | `list`, `items`, `array`, `collection`, `values`, `keys`, `entries`, `userList`, `itemArray`, `dataCollection` | `Array<any>` | Matches exact names or props ending with: `List`, `Items`, `Array`, `Collection`, `Values`, `Keys`, `Entries` (capitalized) |
+| **Numbers** | `count`, `size`, `width`, `height`, `index`, `length`, `page`, `limit`, `offset`, `duration`, `timeout`, `delay`, `amount`, `price`, `value`, `number`, `quantity`, `total`, `max`, `min`, `itemCount`, `pageSize`, `maxWidth`, `minHeight` | `number` | Matches exact names or props ending with: `Count`, `Size`, `Width`, `Height`, `Index`, `Length`, `Page`, `Limit`, `Offset`, `Duration`, `Timeout`, `Delay`, `Amount`, `Price`, `Value`, `Number`, `Quantity`, `Total`, `Max`, `Min` (capitalized) |
+| **Objects** | `config`, `options`, `settings`, `data`, `info`, `meta`, `context`, `state`, `status`, `userConfig`, `appOptions`, `themeSettings` | `Record<string, any>` | Matches exact names or props ending with: `Config`, `Options`, `Settings`, `Data`, `Info`, `Meta`, `Context`, `State`, `Status` (capitalized) |
+| **Dates** | `date`, `time`, `timestamp`, `startDate`, `endDate`, `startTime`, `endTime`, `birthday`, `birthDate`, `dueDate`, `releaseDate`, `createdAt`, `updatedAt`, `deletedAt`, `publishedAt`, `expiresAt`, `userDate`, `eventTime`, `logTimestamp` | `string \| number \| Date` | Matches exact date names, props ending with: `Date`, `Time`, `Timestamp` (capitalized), or props ending with `At` after: `created`, `updated`, `deleted`, `published`, `expires` |
+| **Strings** | `id`, `ID`, `key`, `name`, `title`, `label`, `text`, `message`, `url`, `URL`, `href`, `path`, `type`, `class`, `className`, `src`, `alt`, `placeholder`, `content`, `description`, `color`, `mode`, `theme`, `userId`, `userName`, `pageTitle`, `itemLabel` | `string` | Matches exact names or props ending with: `Id`, `ID`, `Key`, `Name`, `Title`, `Label`, `Text`, `Message`, `Url`, `URL`, `Href`, `Path`, `Type`, `Class`, `ClassName`, `Src`, `Alt`, `Placeholder`, `Content`, `Description`, `Color`, `Mode`, `Theme` (capitalized) |
 
 ### InferComponentProps
 
