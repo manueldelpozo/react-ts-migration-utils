@@ -1,6 +1,6 @@
 {
   "name": "react-ts-migration-utils",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Utilities to help migrate legacy React JS projects to TypeScript",
   "author": "Manuel del Pozo",
   "license": "MIT",
@@ -32,7 +32,10 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "playground:dev": "npm --prefix ./examples/playground run dev",
+    "playground:build": "npm --prefix ./examples/playground run build",
+    "playground:preview": "npm --prefix ./examples/playground run preview"
   },
   "devDependencies": {
     "@types/prop-types": "^15.7.15",
