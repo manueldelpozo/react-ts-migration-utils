@@ -21,12 +21,31 @@ npm install react-ts-migration-utils
 
 ## Usage
 
-### TypeFromProps
+### Local playground
+
+To try the utilities locally without publishing:
+
+```bash
+# from repo root
+npm install
+npm run build            # builds the library to dist/
+cd examples/playground
+npm install              # links local package via file:../..
+npm run dev              # open the URL shown
+```
+
+Or via root scripts:
+
+```bash
+npm run playground:dev
+```
+
+### TypeFromPropKeys
 
 Automatically infer TypeScript types from prop names using intelligent naming conventions. Perfect for quickly typing components without manually writing every type!
 
 ```typescript
-import type { TypeFromProps } from 'react-ts-migration-utils';
+import type { TypeFromPropKeys } from 'react-ts-migration-utils';
 
 // Use with destructured props - define props inline in typeof
 function MyComponent({
@@ -39,7 +58,7 @@ function MyComponent({
   createdAt,
   publishedDate,
   config,
-}: TypeFromProps<typeof {
+}: TypeFromPropKeys<typeof {
   isVisible: any;
   itemCount: any;
   userName: any;
@@ -75,6 +94,25 @@ function MyComponent({
 }
 ```
 
+**Works with mixed known and unknown types:**
+```typescript
+import type { TypeFromPropKeys } from 'react-ts-migration-utils';
+
+type MixedProps = {
+  onClick: unknown;  // Will be inferred as function
+  count: number;     // Will remain as number (more specific)
+  name: string;      // Will remain as string (more specific)
+};
+
+type Inferred = TypeFromPropKeys<MixedProps>;
+// Result:
+// {
+//   onClick: (...args: any[]) => void | Promise<void>;
+//   count: number;
+//   name: string;
+// }
+```
+
 **Supported Patterns:**
 - **Event handlers**: `on*`, `handle*`, `set*`, etc. → `(...args: any[]) => void | Promise<void>`
 - **React nodes**: `children`, `icon`, `header`, `footer`, `*Icon`, `*Content`, etc. → `ReactNode`
@@ -84,6 +122,51 @@ function MyComponent({
 - **Objects**: `*config`, `*options`, `*settings`, `data`, etc. → `Record<string, any>`
 - **Dates**: `*Date`, `*Time`, `*At`, `createdAt`, `updatedAt`, etc. → `string | number | Date`
 - **Strings**: `*Id`, `*Name`, `*Title`, `*Label`, etc. → `string`
+
+### InferComponentProps
+
+Extract and infer props types directly from a React component. This utility automatically extracts the props type from a component and applies `TypeFromPropKeys` to infer types based on naming conventions.
+
+```typescript
+import type { InferComponentProps } from 'react-ts-migration-utils';
+
+// Function component with unknown types
+const MyComponent = (props: {
+  onClick: unknown;
+  count: unknown;
+  isVisible: unknown;
+}) => {
+  // component implementation
+};
+
+// Automatically infer the props type
+type Props = InferComponentProps<typeof MyComponent>;
+// Result:
+// {
+//   onClick: (...args: any[]) => void | Promise<void>;
+//   count: number;
+//   isVisible: boolean;
+// }
+```
+
+**Works with React.FC components:**
+```typescript
+import type { InferComponentProps } from 'react-ts-migration-utils';
+
+const MyComponent: React.FC<{
+  isVisible: unknown;
+  title: unknown;
+}> = (props) => {
+  // component implementation
+};
+
+type Props = InferComponentProps<typeof MyComponent>;
+// Result:
+// {
+//   isVisible: boolean;
+//   title: string;
+// }
+```
 
 ### TypeFromPropTypes
 
